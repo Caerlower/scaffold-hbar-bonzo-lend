@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "description": "Scaffold-HBAR external template: Bonzo Finance lending on Hedera with HTS checks, HCS audit trail, and AuditAnchor.",
-  "homepage": "https://github.com/Caerlower/hedra-template-bounty#readme",
+  "homepage": "https://github.com/Caerlower/scaffold-hbar-bonzo-lend#readme",
   "bugs": {
-    "url": "https://github.com/Caerlower/hedra-template-bounty/issues"
+    "url": "https://github.com/Caerlower/scaffold-hbar-bonzo-lend/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Caerlower/hedra-template-bounty.git"
+    "url": "git+https://github.com/Caerlower/scaffold-hbar-bonzo-lend.git"
   },
   "license": "MIT",
   "author": "Caerlower",

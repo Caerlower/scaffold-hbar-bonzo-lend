@@ -1,6 +1,6 @@
 # Scaffold-HBAR · Bonzo Lend
 
-[![CI](https://github.com/Caerlower/hedra-template-bounty/actions/workflows/lint.yaml/badge.svg)](https://github.com/Caerlower/hedra-template-bounty/actions/workflows/lint.yaml)
+[![CI](https://github.com/Caerlower/scaffold-hbar-bonzo-lend/actions/workflows/lint.yaml/badge.svg)](https://github.com/Caerlower/scaffold-hbar-bonzo-lend/actions/workflows/lint.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 [![Node](https://img.shields.io/badge/node-%E2%89%A520.18.3-brightgreen.svg)](./.nvmrc)
 [![Scaffold-HBAR](https://img.shields.io/badge/scaffold--hbar-external%20template-8259EF.svg)](https://docs.hedera.com/solutions/tools/scaffold-hbar)
@@ -8,7 +8,7 @@
 **One command from zero to a working Hedera lending dApp** — supply, borrow, repay, and withdraw against [Bonzo Finance](https://bonzo.finance/), with native HTS association checks and an optional HCS audit trail.
 
 ```bash
-npm create scaffold-hbar@latest my-bonzo-app -- --template Caerlower/hedra-template-bounty
+npm create scaffold-hbar@latest my-bonzo-app -- --template Caerlower/scaffold-hbar-bonzo-lend
 cd my-bonzo-app && yarn install && yarn next:dev
 ```
 
@@ -35,7 +35,7 @@ Bonzo is load-bearing: remove it and the product disappears. That is the point o
 
 ```bash
 npm create scaffold-hbar@latest my-bonzo-app -- \
-  --template Caerlower/hedra-template-bounty \
+  --template Caerlower/scaffold-hbar-bonzo-lend \
   --frontend nextjs-app \
   --solidity-framework hardhat \
   --network testnet \
@@ -48,8 +48,8 @@ yarn next:dev
 ### Option B — Clone this repo
 
 ```bash
-git clone https://github.com/Caerlower/hedra-template-bounty.git
-cd hedra-template-bounty
+git clone https://github.com/Caerlower/scaffold-hbar-bonzo-lend.git
+cd scaffold-hbar-bonzo-lend
 corepack enable && corepack prepare yarn@stable --activate
 yarn install
 yarn next:dev
@@ -90,7 +90,7 @@ Debug Contracts and the local explorer remain available under `/debug` and `/blo
 ## Project layout
 
 ```text
-hedra-template-bounty/
+scaffold-hbar-bonzo-lend/
 ├── packages/
 │   ├── hardhat/                 # AuditAnchor.sol, deploy, tests
 │   └── nextjs/                  # Next.js App Router UI + Bonzo hooks
