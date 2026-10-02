@@ -3,10 +3,8 @@
 Production-oriented Scaffold-HBAR template for **Bonzo Finance** lending on Hedera. Supply, borrow, repay, and withdraw against live Bonzo pools, with HTS association checks, an optional HCS audit topic, and an on-chain `AuditAnchor` contract.
 
 ```bash
-npm create scaffold-hbar@latest my-bonzo-app -- --template <your-github-user>/hedra-template-bounty
+npm create scaffold-hbar@latest my-bonzo-app -- --template Caerlower/hedra-template-bounty
 ```
-
-Replace `<your-github-user>/hedra-template-bounty` with this repository once published.
 
 ## Why this template
 
