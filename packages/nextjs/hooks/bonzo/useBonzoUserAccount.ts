@@ -32,7 +32,7 @@ export const useBonzoUserAccount = () => {
     functionName: "getUserAccountData",
     args: address ? [address] : undefined,
     chainId: targetNetwork.id,
-    query: { enabled: !!core && !!address },
+    query: { enabled: !!core && !!address, staleTime: 12_000 },
   });
 
   const userReserveContracts = useMemo(() => {
@@ -63,12 +63,12 @@ export const useBonzoUserAccount = () => {
     refetch: refetchReserves,
   } = useReadContracts({
     contracts: userReserveContracts,
-    query: { enabled: !!core && !!address && reserves.length > 0 },
+    query: { enabled: !!core && !!address && reserves.length > 0, staleTime: 12_000 },
   });
 
   const { data: configResults } = useReadContracts({
     contracts: configContracts,
-    query: { enabled: !!core && reserves.length > 0 },
+    query: { enabled: !!core && reserves.length > 0, staleTime: 60_000 },
   });
 
   const positions: UserReserveRow[] = useMemo(() => {

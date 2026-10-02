@@ -51,7 +51,7 @@ export const useBonzoMarkets = () => {
     refetch: refetchReserve,
   } = useReadContracts({
     contracts: reserveDataContracts,
-    query: { enabled: !!core && reserves.length > 0 },
+    query: { enabled: !!core && reserves.length > 0, staleTime: 12_000 },
   });
 
   const {
@@ -60,7 +60,7 @@ export const useBonzoMarkets = () => {
     refetch: refetchConfig,
   } = useReadContracts({
     contracts: configContracts,
-    query: { enabled: !!core && reserves.length > 0 },
+    query: { enabled: !!core && reserves.length > 0, staleTime: 12_000 },
   });
 
   const { data: onChainReserves } = useReadContract({
@@ -68,7 +68,7 @@ export const useBonzoMarkets = () => {
     abi: protocolDataProviderAbi,
     functionName: "getAllReservesTokens",
     chainId: targetNetwork.id,
-    query: { enabled: !!core },
+    query: { enabled: !!core, staleTime: 60_000 },
   });
 
   const markets: MarketRow[] = useMemo(() => {

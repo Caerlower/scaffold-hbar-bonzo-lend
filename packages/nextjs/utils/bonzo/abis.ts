@@ -74,6 +74,13 @@ export const lendingPoolAbi = [
       { name: "healthFactor", type: "uint256" },
     ],
   },
+  {
+    type: "function",
+    name: "paused",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "bool" }],
+  },
 ] as const;
 
 export const protocolDataProviderAbi = [
@@ -248,6 +255,17 @@ export const erc20Abi = [
     stateMutability: "view",
     inputs: [],
     outputs: [{ name: "", type: "string" }],
+  },
+] as const;
+
+/** WHBAR wrap helper (0x…3ad1) — payable deposit() mints WHBAR from native HBAR */
+export const whbarHelperAbi = [
+  {
+    type: "function",
+    name: "deposit",
+    stateMutability: "payable",
+    inputs: [],
+    outputs: [],
   },
 ] as const;
 

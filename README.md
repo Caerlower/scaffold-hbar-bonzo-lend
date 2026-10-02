@@ -70,6 +70,18 @@ yarn next:dev
 2. HTS assets (USDC, SAUCE, …) — Bonzo Discord `#testnet-faucet` or [SaucerSwap testnet](https://testnet.saucerswap.finance/)  
    Guide: [Bonzo testnet docs](https://docs.bonzo.finance/hub/bonzo-lend/bonzo-lend-testnet)
 
+### Testnet status (Bonzo writes)
+
+This template targets Bonzo’s **current** published testnet contracts ([lend-contracts](https://docs.bonzo.finance/hub/developer/bonzo-lend/lend-contracts)):
+
+| Item | Address / note |
+| --- | --- |
+| LendingPool | `0xf67DBe9bD1B331cA379c44b5562EAa1CE831EbC2` (`paused() = false`) |
+| ProtocolDataProvider | `0x121A2AFFA5f595175E60E01EAeF0deC43Cc3b024` |
+| USDC (HTS) | `0x…1549` / Token ID `0.0.5449` (same token as SaucerSwap testnet) |
+
+**As of 2026-10-02:** market **reads** work. Live **supply / borrow** against Bonzo testnet revert on-chain (`CALLER_NOT_AUTHORIZED` on deposit). The older pool (`0x7710…`) is still `paused() = true`. The UI surfaces a pause / failure banner when writes cannot succeed. Your own **AuditAnchor** deploy remains the template’s on-chain proof of life independent of Bonzo’s testnet health.
+
 ---
 
 ## What you can do in the app
@@ -177,9 +189,9 @@ Wallet (RainbowKit / wagmi / viem)
 
 | Contract | Address |
 | --- | --- |
-| LendingPool | `0x7710a96b01e02eD00768C3b39BfA7B4f1c128c62` |
-| ProtocolDataProvider | `0xe7432d9012d2a6cd811FDf42ecE43a0aa680c958` |
-| WETHGateway | `0xA824820e35D6AE4D368153e83b7920B2DC3Cf964` |
+| LendingPool | `0xf67DBe9bD1B331cA379c44b5562EAa1CE831EbC2` |
+| ProtocolDataProvider | `0x121A2AFFA5f595175E60E01EAeF0deC43Cc3b024` |
+| WETHGateway | `0x16197Ef10F26De77C9873d075f8774BdEc20A75d` |
 | WHBAR token | `0x0000000000000000000000000000000000003ad2` |
 | WHBAR wrap helper | `0x0000000000000000000000000000000000003ad1` |
 

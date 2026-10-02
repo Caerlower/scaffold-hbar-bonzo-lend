@@ -22,19 +22,22 @@ export type BonzoReserveMeta = {
   token: Address;
   aToken: Address;
   variableDebt: Address;
+  /** Hedera Token Service ID for HashPack association (e.g. 0.0.15058) */
+  tokenId?: string;
   isNativeWrapped?: boolean;
   /** WHBAR helper contract used for wrap/unwrap (deposit()) — distinct from the HTS token address */
   wrapHelper?: Address;
 };
 
 export const BONZO_CORE: Record<BonzoNetworkKey, BonzoCoreAddresses> = {
+  // Testnet redeployed (docs.bonzo.finance lend-contracts) — old 0x7710… pool is paused
   hedera_testnet: {
-    lendingPool: "0x7710a96b01e02eD00768C3b39BfA7B4f1c128c62",
-    addressesProvider: "0xa184010a65343280e795eeF0B0B6eD870b551e6f",
-    protocolDataProvider: "0xe7432d9012d2a6cd811FDf42ecE43a0aa680c958",
-    wethGateway: "0xA824820e35D6AE4D368153e83b7920B2DC3Cf964",
-    aaveOracle: "0x4aa505a308EdBA7854C031976DB56A8Aa635d3a6",
-    walletBalanceProvider: "0x2D0c5133666113BB04d71D9Dbc34f0e2dc6B1F52",
+    lendingPool: "0xf67DBe9bD1B331cA379c44b5562EAa1CE831EbC2",
+    addressesProvider: "0x873575d4AeeBe015AcF3BB17AAa9DD248cc76D68",
+    protocolDataProvider: "0x121A2AFFA5f595175E60E01EAeF0deC43Cc3b024",
+    wethGateway: "0x16197Ef10F26De77C9873d075f8774BdEc20A75d",
+    aaveOracle: "0x9B940a1e60D652bCaf09C1d2224d1A4a544FDFb0",
+    walletBalanceProvider: "0xBB265cFA2Ccaa97260fAfd7303fCE751F3081d51",
   },
   hedera_mainnet: {
     lendingPool: "0x236897c518996163E7b313aD21D1C9fCC7BA1afc",
@@ -52,40 +55,46 @@ export const BONZO_RESERVES: Record<BonzoNetworkKey, BonzoReserveMeta[]> = {
     {
       symbol: "WHBAR",
       token: "0x0000000000000000000000000000000000003ad2",
-      aToken: "0xe65dAF55D9A2F7768bdd27d430726b2Df7144636",
-      variableDebt: "0xacE6c84d8737e377c1f85BE5f7BC82E4fF3248E6",
+      tokenId: "0.0.15058",
+      aToken: "0xf594C3d27463bEd0f651847aa7d323908CB5FFaA",
+      variableDebt: "0xF9f8309a8F55e8E480B214B6725F8419FA029D57",
       isNativeWrapped: true,
       wrapHelper: "0x0000000000000000000000000000000000003ad1",
     },
     {
       symbol: "USDC",
       token: "0x0000000000000000000000000000000000001549",
-      aToken: "0xee72C37fEc48C9FeC6bbD0982ecEb7d7a038841e",
-      variableDebt: "0x5F52FB083A807554b0A9bdB6b5777Fa4C620b7A6",
+      tokenId: "0.0.5449",
+      aToken: "0x1348D518996a26a774Eb005b925A655808265D39",
+      variableDebt: "0xD2A4c538E7CABD2516C29Dbb962E45Ca86F3bB48",
     },
     {
       symbol: "SAUCE",
       token: "0x0000000000000000000000000000000000120f46",
-      aToken: "0xC4d4315Ac919253b8bA48D5e609594921eb5525c",
-      variableDebt: "0x65be417A48511d2f20332673038e5647a4ED194D",
+      tokenId: "0.0.1183558",
+      aToken: "0x89568c3cD65C54AC41158e2A03E747cCC091f0BE",
+      variableDebt: "0x51c27355064F85de57C6965CeF9baBA08CcfF13C",
     },
     {
       symbol: "HBARX",
       token: "0x0000000000000000000000000000000000220ced",
-      aToken: "0x37FfB9d2c91ef6858E54DD5B05805339A1aEA207",
-      variableDebt: "0x7A617Ec0B2aF56d4BD5f2aeBB547fcD3439987AD",
+      tokenId: "0.0.2231533",
+      aToken: "0x259F2BE6542Bf882b6EA4ab157F4112F4Cec0666",
+      variableDebt: "0x7f6A2Af6921915A80673da5d233710918A18Db75",
     },
     {
       symbol: "XSAUCE",
       token: "0x000000000000000000000000000000000015a59b",
-      aToken: "0x2217F55E2056C15a21ED7a600446094C36720f29",
-      variableDebt: "0xD1C09A79C5A2b1eA488A1a00b23FCEDa40f750f9",
+      tokenId: "0.0.1418651",
+      aToken: "0x7521De32AdC1743684c1d802F2C288c6cA867981",
+      variableDebt: "0x91E0F09F55DC746Bd44c9AF4A9a8F3C9E50e3625",
     },
     {
       symbol: "KARATE",
       token: "0x00000000000000000000000000000000003991ed",
-      aToken: "0xd5D2e84E2d29E3b8C49C2ec08Bc9d5CA01639de9",
-      variableDebt: "0x0AeCA92D29fF9CEb3751dB01034bFE71E7f6B13c",
+      tokenId: "0.0.3772909",
+      aToken: "0x704cec3C19d306eD082377ae1d88F772c1C8D0de",
+      variableDebt: "0x2EA9dA7FcbE59d8ceE7dCb9724BF8714Ae3677fd",
     },
   ],
   hedera_mainnet: [

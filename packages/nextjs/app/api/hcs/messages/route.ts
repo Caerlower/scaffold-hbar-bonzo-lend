@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { resolveTopicId } from "~~/services/hcs/server";
+import { resolveTopicId } from "~~/services/hcs/config";
 
 const MIRROR_BASE: Record<string, string> = {
   testnet: process.env.HEDERA_MIRROR_TESTNET_URL ?? "https://testnet.mirrornode.hedera.com",

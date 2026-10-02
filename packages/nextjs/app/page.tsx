@@ -71,6 +71,10 @@ const Home: NextPage = () => {
               Supply assets
             </Link>
           </div>
+          <p className="text-xs text-white/70 m-0 mt-6 max-w-xl mx-auto leading-relaxed">
+            Note: Bonzo testnet market reads are live. Supply/borrow may revert until Bonzo restores testnet lending
+            writes — see README “Testnet status”.
+          </p>
         </div>
       </div>
 

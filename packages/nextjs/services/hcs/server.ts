@@ -1,13 +1,17 @@
 import { Client, PrivateKey, TopicCreateTransaction, TopicId, TopicMessageSubmitTransaction } from "@hiero-ledger/sdk";
+import { getOperatorCredentials, resolveTopicId } from "~~/services/hcs/config";
+
+export { resolveTopicId };
 
 export function getOperatorClient(network: "testnet" | "mainnet" = "testnet"): Client | null {
-  const accountId = process.env.HEDERA_OPERATOR_ID;
-  const privateKey = process.env.HEDERA_OPERATOR_KEY;
-  if (!accountId || !privateKey) return null;
+  const creds = getOperatorCredentials();
+  if (!creds) return null;
 
   const client = network === "mainnet" ? Client.forMainnet() : Client.forTestnet();
-  const key = privateKey.startsWith("0x") ? PrivateKey.fromStringECDSA(privateKey) : PrivateKey.fromString(privateKey);
-  client.setOperator(accountId, key);
+  const key = creds.privateKey.startsWith("0x")
+    ? PrivateKey.fromStringECDSA(creds.privateKey)
+    : PrivateKey.fromString(creds.privateKey);
+  client.setOperator(creds.accountId, key);
   return client;
 }
 
@@ -38,8 +42,4 @@ export async function submitAuditMessage(topicId: string, message: string): Prom
   } finally {
     client.close();
   }
-}
-
-export function resolveTopicId(): string | null {
-  return process.env.HCS_AUDIT_TOPIC_ID || null;
 }

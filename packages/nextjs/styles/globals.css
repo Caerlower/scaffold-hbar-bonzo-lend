@@ -1,4 +1,8 @@
-/* Styrene A Web – Hedera brand font (fallback: Montserrat per brand.hedera.com) */
+/* Montserrat fallback (Hedera brand). Must come before other CSS rules. */
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+
+/* Styrene A Web – Hedera brand font */
 @font-face {
   font-family: "Styrene A Web";
   src:
@@ -8,9 +12,6 @@
   font-style: normal;
   font-display: swap;
 }
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap");
-@import "tailwindcss";
-
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 @theme {
@@ -125,7 +126,7 @@
 }
 
 .btn {
-  @apply shadow-md;
+  @apply shadow-md rounded-full;
 }
 
 .btn.btn-ghost {

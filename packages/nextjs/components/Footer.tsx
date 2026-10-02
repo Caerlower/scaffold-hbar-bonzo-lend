@@ -21,13 +21,13 @@ export const Footer = () => {
           <div className="flex flex-col md:flex-row gap-2 pointer-events-auto">
             {nativeCurrencyPrice > 0 && (
               <div>
-                <div className="btn btn-primary btn-sm font-normal gap-1 cursor-auto">
+                <div className="btn btn-primary btn-sm font-normal gap-1 cursor-auto rounded-full">
                   <CurrencyDollarIcon className="h-4 w-4" />
                   <span>{nativeCurrencyPrice.toFixed(2)}</span>
                 </div>
               </div>
             )}
-            {isTestnet && <HederaPortalFaucet showIcon />}
+            {isTestnet && <HederaPortalFaucet showIcon className="rounded-full" />}
           </div>
           <SwitchTheme className="pointer-events-auto" />
         </div>

@@ -29,7 +29,8 @@ const targetNetworks = [chains.hederaTestnet, chains.hedera, hederaLocalFork] as
 const scaffoldConfig = {
   targetNetworks,
 
-  pollingInterval: 10000,
+  // Less chatty JSON-RPC while developing / demoing
+  pollingInterval: 15000,
 
   enableBurnerWallet: true,
 

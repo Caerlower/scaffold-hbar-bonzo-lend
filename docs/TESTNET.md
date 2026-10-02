@@ -26,10 +26,16 @@ Confirm on Hashscan (contract + create transaction).
 yarn next:dev
 ```
 
-1. Connect HashPack (testnet).
+1. Connect HashPack (**Testnet** — not Mainnet). Disconnect/reconnect if the wallet popup shows Mainnet.
 2. Get HTS assets from Bonzo Discord `#testnet-faucet` or SaucerSwap testnet.
-3. Associate tokens in the wallet if prompted (`/supply` shows Mirror Node association status).
-4. Prefer **USDC / SAUCE** for the first supply; WHBAR uses Bonzo’s native `msg.value` path.
+3. Associate tokens in the wallet if prompted. HashPack expects Token IDs (`0.0.x`), e.g. USDC `0.0.5449`, WHBAR `0.0.15058` — not the `0x…` EVM form.
+4. Prefer **USDC** for the first supply path. WHBAR wraps native HBAR via the helper then approves/deposits.
+
+### Known limitation (Bonzo testnet writes)
+
+Core addresses match [Bonzo lend-contracts](https://docs.bonzo.finance/hub/developer/bonzo-lend/lend-contracts) (LendingPool `0xf67D…EbC2`). USDC `0.0.5449` is listed, active, and borrow/collateral enabled on-chain.
+
+However, as of **2026-10-02**, deposits to that pool revert with `CALLER_NOT_AUTHORIZED` (observed across many accounts; zero recent successful deposits). The previous pool (`0x7710…128c62`) remains `paused() = true`. Until Bonzo restores testnet lending, demo **Markets**, wallet/HTS UX, and **AuditAnchor** Hashscan proofs; do not treat a failed Bonzo supply as a template misconfiguration.
 
 ## 4. Optional HCS topic
 

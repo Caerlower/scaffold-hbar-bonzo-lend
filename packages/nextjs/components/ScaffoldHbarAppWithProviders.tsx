@@ -32,6 +32,8 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
+      staleTime: 12_000,
+      retry: 1,
     },
   },
 });
@@ -73,7 +75,7 @@ export const ScaffoldHbarAppWithProviders = ({ children }: { children: React.Rea
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <ProgressBar height="3px" color="#2299dd" />
-        <RainbowKitProvider avatar={BlockieAvatar} coolMode initialChain={hederaTestnet} theme={rainbowKitTheme}>
+        <RainbowKitProvider avatar={BlockieAvatar} initialChain={hederaTestnet} theme={rainbowKitTheme}>
           <ScaffoldHbarApp>{children}</ScaffoldHbarApp>
         </RainbowKitProvider>
       </QueryClientProvider>

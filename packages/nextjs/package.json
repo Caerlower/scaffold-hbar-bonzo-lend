@@ -5,11 +5,12 @@
   "scripts": {
     "build": "next build",
     "check-types": "tsc --noEmit --incremental",
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "format": "prettier --write . '!(node_modules|.next|contracts)/**/*'",
     "lint": "next lint",
     "serve": "next start",
-    "start": "next dev"
+    "start": "next dev --turbopack",
+    "preview": "next build && next start"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.5",

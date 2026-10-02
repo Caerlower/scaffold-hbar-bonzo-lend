@@ -1,5 +1,5 @@
 import { Hash, SendTransactionParameters, TransactionReceipt, WalletClient } from "viem";
-import { Config, useWalletClient } from "wagmi";
+import { Config, useAccount, useWalletClient } from "wagmi";
 import { getPublicClient } from "wagmi/actions";
 import { SendTransactionMutate } from "wagmi/query";
 import scaffoldConfig from "~~/scaffold.config";
@@ -34,15 +34,13 @@ const TxnNotification = ({ message, blockExplorerLink }: { message: string; bloc
  * @returns function that takes in transaction function as callback, shows UI feedback for transaction and returns a promise of the transaction hash
  */
 export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => {
-  let walletClient = _walletClient;
-  const { data } = useWalletClient();
-  if (walletClient === undefined && data) {
-    walletClient = data;
-  }
+  const { chain } = useAccount();
+  const { data } = useWalletClient({ chainId: chain?.id });
+  const walletClient = _walletClient ?? data;
 
   const result: TransactionFunc = async (tx, options) => {
     if (!walletClient) {
-      notification.error("Cannot access account");
+      notification.error("Cannot access account — reconnect your wallet");
       console.error("⚡️ ~ file: useTransactor.tsx ~ error");
       return;
     }
@@ -55,7 +53,7 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
     try {
       chainId = await walletClient.getChainId();
       // Get full transaction from public client
-      const publicClient = getPublicClient(wagmiConfig);
+      const publicClient = getPublicClient(wagmiConfig, { chainId });
       if (!publicClient) throw new Error("Public client not available");
 
       notificationId = notification.loading(<TxnNotification message="Awaiting for user confirmation" />);
