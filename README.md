@@ -112,15 +112,19 @@ yarn hardhat:compile
 
 ## Verifiable testnet transactions
 
-Follow **[SUBMISSION.md](SUBMISSION.md)** to fund a deployer, deploy `AuditAnchor`, and record Hashscan links here:
+| Proof | Link |
+| --- | --- |
+| AuditAnchor deploy | [0x1629be01…1e5a25](https://hashscan.io/testnet/transaction/0x1629be01318a618b87a13c440fe192f47110e4f94543bb4cb6084fac721e5a25) |
+| AuditAnchor contract | [0x3e485CA7…F96d12](https://hashscan.io/testnet/contract/0x3e485CA75B4A49d186912Bb53C5BF1FEadF96d12) |
+| AuditAnchor `recordAction` | [0xdc9d8da7…f4d9f5c1](https://hashscan.io/testnet/transaction/0xdc9d8da7cfa5b989432d93cd0221b21dcb290bc92ecb7ff2a6b8aff4d4b9f5c1) |
+| WHBAR wrap (HTS) | [0x4d39d53f…c96ed1b](https://hashscan.io/testnet/transaction/0x4d39d53f1dba03cd62b17f02f62bf2db4665f4843f4b8135c3fff6ef0c96ed1b) |
 
-- AuditAnchor deploy: _pending — see SUBMISSION.md_
-- Sample Bonzo deposit: _pending — see SUBMISSION.md_
+Mirror Node:
 
-Mirror Node examples:
+- Contract: `https://testnet.mirrornode.hedera.com/api/v1/contracts/0x3e485CA75B4A49d186912Bb53C5BF1FEadF96d12`
+- Account: `https://testnet.mirrornode.hedera.com/api/v1/accounts/0xb66687Ed61aec8502F8601Fd977365f974B8156f`
 
-- Topic messages: `https://testnet.mirrornode.hedera.com/api/v1/topics/<TOPIC_ID>/messages`
-- Contract: `https://hashscan.io/testnet/contract/<ADDRESS>`
+For more proofs (live Bonzo supply from the UI), see [SUBMISSION.md](SUBMISSION.md).
 
 ## Licence
 

@@ -23,6 +23,8 @@ export type BonzoReserveMeta = {
   aToken: Address;
   variableDebt: Address;
   isNativeWrapped?: boolean;
+  /** WHBAR helper contract used for wrap/unwrap (deposit()) — distinct from the HTS token address */
+  wrapHelper?: Address;
 };
 
 export const BONZO_CORE: Record<BonzoNetworkKey, BonzoCoreAddresses> = {
@@ -53,6 +55,7 @@ export const BONZO_RESERVES: Record<BonzoNetworkKey, BonzoReserveMeta[]> = {
       aToken: "0xe65dAF55D9A2F7768bdd27d430726b2Df7144636",
       variableDebt: "0xacE6c84d8737e377c1f85BE5f7BC82E4fF3248E6",
       isNativeWrapped: true,
+      wrapHelper: "0x0000000000000000000000000000000000003ad1",
     },
     {
       symbol: "USDC",

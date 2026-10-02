@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { Address, Hash, parseUnits, zeroHash } from "viem";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import { useDeployedContractInfo, useTargetNetwork, useTransactor } from "~~/hooks/scaffold-hbar";
-import { VARIABLE_RATE_MODE, auditAnchorAbi, erc20Abi, lendingPoolAbi, wethGatewayAbi } from "~~/utils/bonzo/abis";
+import { VARIABLE_RATE_MODE, auditAnchorAbi, erc20Abi, lendingPoolAbi } from "~~/utils/bonzo/abis";
 import { type BonzoReserveMeta, getBonzoCore, getBonzoReserves } from "~~/utils/bonzo/addresses";
 import { type LendingAction, actionToAnchorType } from "~~/utils/bonzo/format";
 import type { ContractName } from "~~/utils/scaffold-hbar/contract";
@@ -122,52 +122,58 @@ export const useBonzoLending = () => {
       try {
         let txHash: Hash | undefined;
 
-        if (reserve.isNativeWrapped && (action === "deposit" || action === "repay")) {
-          if (action === "deposit") {
+        // Bonzo WHBAR path: amount is 8-decimal token units; msg.value uses 18-decimal HBAR (= amount * 1e10).
+        if (reserve.isNativeWrapped) {
+          const hbarValue = amount * 10_000_000_000n;
+          if (action === "deposit" || action === "repay") {
+            if (reserve.wrapHelper) {
+              await ensureAllowance(reserve.token, reserve.wrapHelper, amount);
+            }
+            await ensureAllowance(reserve.token, core.lendingPool, amount);
+            if (action === "deposit") {
+              txHash = await writeTx(() =>
+                writeContractAsync({
+                  address: core.lendingPool,
+                  abi: lendingPoolAbi,
+                  functionName: "deposit",
+                  args: [reserve.token, amount, address, 0],
+                  value: hbarValue,
+                  chainId: targetNetwork.id,
+                }),
+              );
+            } else {
+              txHash = await writeTx(() =>
+                writeContractAsync({
+                  address: core.lendingPool,
+                  abi: lendingPoolAbi,
+                  functionName: "repay",
+                  args: [reserve.token, amount, VARIABLE_RATE_MODE, address],
+                  value: hbarValue,
+                  chainId: targetNetwork.id,
+                }),
+              );
+            }
+          } else if (action === "withdraw") {
             txHash = await writeTx(() =>
               writeContractAsync({
-                address: core.wethGateway,
-                abi: wethGatewayAbi,
-                functionName: "depositETH",
-                args: [core.lendingPool, address, 0],
-                value: amount,
+                address: core.lendingPool,
+                abi: lendingPoolAbi,
+                functionName: "withdraw",
+                args: [reserve.token, amount, reserve.wrapHelper ?? address],
                 chainId: targetNetwork.id,
               }),
             );
           } else {
             txHash = await writeTx(() =>
               writeContractAsync({
-                address: core.wethGateway,
-                abi: wethGatewayAbi,
-                functionName: "repayETH",
-                args: [core.lendingPool, amount, VARIABLE_RATE_MODE, address],
-                value: amount,
+                address: core.lendingPool,
+                abi: lendingPoolAbi,
+                functionName: "borrow",
+                args: [reserve.token, amount, VARIABLE_RATE_MODE, 0, address],
                 chainId: targetNetwork.id,
               }),
             );
           }
-        } else if (reserve.isNativeWrapped && action === "withdraw") {
-          // Gateway needs aToken allowance
-          await ensureAllowance(reserve.aToken, core.wethGateway, amount);
-          txHash = await writeTx(() =>
-            writeContractAsync({
-              address: core.wethGateway,
-              abi: wethGatewayAbi,
-              functionName: "withdrawETH",
-              args: [core.lendingPool, amount, address],
-              chainId: targetNetwork.id,
-            }),
-          );
-        } else if (reserve.isNativeWrapped && action === "borrow") {
-          txHash = await writeTx(() =>
-            writeContractAsync({
-              address: core.wethGateway,
-              abi: wethGatewayAbi,
-              functionName: "borrowETH",
-              args: [core.lendingPool, amount, VARIABLE_RATE_MODE, 0],
-              chainId: targetNetwork.id,
-            }),
-          );
         } else {
           if (action === "deposit" || action === "repay") {
             await ensureAllowance(reserve.token, core.lendingPool, amount);
