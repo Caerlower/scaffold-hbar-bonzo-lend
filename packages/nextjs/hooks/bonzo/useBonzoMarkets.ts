@@ -78,64 +78,57 @@ export const useBonzoMarkets = () => {
 
   const markets: MarketRow[] = useMemo(() => {
     return reserves.map((r, i) => {
-      const rdRaw = reserveDataResults?.[i]?.result as
-        | readonly [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, number]
-        | {
-            availableLiquidity: bigint;
-            totalStableDebt: bigint;
-            totalVariableDebt: bigint;
-            liquidityRate: bigint;
-            variableBorrowRate: bigint;
-          }
-        | undefined;
-      const cfgRaw = configResults?.[i]?.result as
-        | readonly [bigint, bigint, bigint, bigint, bigint, boolean, boolean, boolean, boolean, boolean]
-        | {
-            decimals: bigint;
-            ltv: bigint;
-            liquidationThreshold: bigint;
-            borrowingEnabled: boolean;
-            isActive: boolean;
-            isFrozen: boolean;
-          }
-        | undefined;
+      const rdResult = reserveDataResults?.[i]?.result as unknown;
+      const cfgResult = configResults?.[i]?.result as unknown;
 
-      const rd = Array.isArray(rdRaw)
-        ? {
-            availableLiquidity: rdRaw[0],
-            liquidityRate: rdRaw[3],
-            variableBorrowRate: rdRaw[4],
-          }
-        : rdRaw
-          ? {
-              availableLiquidity: rdRaw.availableLiquidity,
-              liquidityRate: rdRaw.liquidityRate,
-              variableBorrowRate: rdRaw.variableBorrowRate,
-            }
-          : undefined;
+      let availableLiquidity: bigint | undefined;
+      let liquidityRate: bigint | undefined;
+      let variableBorrowRate: bigint | undefined;
+      if (Array.isArray(rdResult)) {
+        availableLiquidity = rdResult[0] as bigint;
+        liquidityRate = rdResult[3] as bigint;
+        variableBorrowRate = rdResult[4] as bigint;
+      } else if (rdResult && typeof rdResult === "object") {
+        const o = rdResult as Record<string, bigint>;
+        availableLiquidity = o.availableLiquidity;
+        liquidityRate = o.liquidityRate;
+        variableBorrowRate = o.variableBorrowRate;
+      }
 
-      const cfg = Array.isArray(cfgRaw)
-        ? {
-            decimals: cfgRaw[0],
-            ltv: cfgRaw[1],
-            liquidationThreshold: cfgRaw[2],
-            borrowingEnabled: cfgRaw[6],
-            isActive: cfgRaw[8],
-            isFrozen: cfgRaw[9],
-          }
-        : cfgRaw;
+      let decimals: bigint | undefined;
+      let ltvBps: bigint | undefined;
+      let liquidationThresholdBps: bigint | undefined;
+      let borrowingEnabled: boolean | undefined;
+      let isActive: boolean | undefined;
+      let isFrozen: boolean | undefined;
+      if (Array.isArray(cfgResult)) {
+        decimals = cfgResult[0] as bigint;
+        ltvBps = cfgResult[1] as bigint;
+        liquidationThresholdBps = cfgResult[2] as bigint;
+        borrowingEnabled = cfgResult[6] as boolean;
+        isActive = cfgResult[8] as boolean;
+        isFrozen = cfgResult[9] as boolean;
+      } else if (cfgResult && typeof cfgResult === "object") {
+        const o = cfgResult as Record<string, bigint | boolean>;
+        decimals = o.decimals as bigint | undefined;
+        ltvBps = o.ltv as bigint | undefined;
+        liquidationThresholdBps = o.liquidationThreshold as bigint | undefined;
+        borrowingEnabled = o.borrowingEnabled as boolean | undefined;
+        isActive = o.isActive as boolean | undefined;
+        isFrozen = o.isFrozen as boolean | undefined;
+      }
 
       return {
         ...r,
-        availableLiquidity: rd?.availableLiquidity,
-        liquidityRate: rd?.liquidityRate,
-        variableBorrowRate: rd?.variableBorrowRate,
-        decimals: cfg?.decimals,
-        ltvBps: cfg?.ltv,
-        liquidationThresholdBps: cfg?.liquidationThreshold,
-        borrowingEnabled: cfg?.borrowingEnabled,
-        isActive: cfg?.isActive,
-        isFrozen: cfg?.isFrozen,
+        availableLiquidity,
+        liquidityRate,
+        variableBorrowRate,
+        decimals,
+        ltvBps,
+        liquidationThresholdBps,
+        borrowingEnabled,
+        isActive,
+        isFrozen,
       };
     });
   }, [reserves, reserveDataResults, configResults]);
