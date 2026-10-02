@@ -1,6 +1,6 @@
 {
   "name": "bonzo-lend",
-  "description": "Bonzo Finance lending on Hedera: supply, borrow, repay, withdraw with HTS association checks, HCS audit trail, and AuditAnchor.",
+  "description": "Bonzo Finance lending on Hedera — supply, borrow, repay, withdraw with HTS association checks, optional HCS audit trail, and AuditAnchor.",
   "create-scaffold-hbar": {
     "capabilities": {
       "frontend": ["nextjs-app"],

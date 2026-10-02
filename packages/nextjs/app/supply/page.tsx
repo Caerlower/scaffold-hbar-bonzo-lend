@@ -16,14 +16,14 @@ const SupplyPage: NextPage = () => {
         reserves={reserves}
         defaultSymbol="WHBAR"
         title="Supply"
-        description="Deposit into Bonzo LendingPool. WHBAR uses WETHGateway with native HBAR (msg.value)."
+        description="Deposit into Bonzo LendingPool. For WHBAR, amount uses 8 decimals and the tx sends native HBAR as msg.value (Bonzo scaling)."
       />
       <LendingForm
         action="withdraw"
         reserves={reserves}
         defaultSymbol="WHBAR"
         title="Withdraw"
-        description="Withdraw supplied balance. For WHBAR, approve aTokens to the gateway first (handled automatically)."
+        description="Withdraw supplied balance. For WHBAR, underlying is sent to the wrap helper when configured."
       />
     </div>
   );

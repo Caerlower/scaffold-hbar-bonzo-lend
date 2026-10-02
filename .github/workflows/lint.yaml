@@ -1,21 +1,20 @@
-name: Lint
+name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  ci:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node: [lts/*]
+  quality:
+    name: Lint · types · tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -23,26 +22,37 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup node env
-        uses: actions/setup-node@v3
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version-file: ".nvmrc"
           cache: yarn
+
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Run Hardhat node and deploy contracts
+      - name: Compile contracts
+        run: yarn hardhat:compile
+
+      - name: Start Hardhat fork and deploy
         run: |
           yarn hardhat:chain &
-          timeout 60s bash -c 'until curl -s -X POST http://127.0.0.1:8545 -H "Content-Type: application/json" --data "{\"jsonrpc\":\"2.0\",\"method\":\"web3_clientVersion\",\"params\":[],\"id\":1}" >/dev/null; do sleep 2; done'
+          timeout 90s bash -c 'until curl -s -X POST http://127.0.0.1:8545 -H "Content-Type: application/json" --data "{\"jsonrpc\":\"2.0\",\"method\":\"web3_clientVersion\",\"params\":[],\"id\":1}" >/dev/null; do sleep 2; done'
           yarn hardhat:deploy --network localhost
 
-      - name: Run nextjs lint
-        run: yarn next:lint --max-warnings=0
+      - name: Hardhat tests
+        run: yarn hardhat:test
 
-      - name: Check typings on nextjs
+      - name: Lint
+        run: |
+          yarn next:lint --max-warnings=0
+          yarn hardhat:lint --max-warnings=0
+
+      - name: Typecheck Next.js
         run: yarn next:check-types
 
-      - name: Run hardhat lint
-        run: yarn hardhat:lint --max-warnings=0
+      - name: Build Next.js
+        run: yarn next:build

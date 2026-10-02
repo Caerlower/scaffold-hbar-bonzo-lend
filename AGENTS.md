@@ -1,16 +1,14 @@
-# Agent instructions — Bonzo Lend template
+# Agent instructions — Bonzo Lend
 
-Briefing for coding agents (Cursor, Claude Code, Codex). Claude Code also loads `CLAUDE.md`.
+Briefing for coding agents (Cursor, Claude Code, Codex). Claude Code also loads [`CLAUDE.md`](./CLAUDE.md).
 
-This Scaffold-HBAR app integrates **Bonzo Finance** (Aave v2–compatible lending) on Hedera testnet/mainnet. Stack: Next.js App Router, RainbowKit, wagmi, viem, Hardhat, DaisyUI.
-
-Package manager: Yarn workspaces (`packageManager` in root `package.json`). Prefer `yarn <script>`; if the user scaffolded with npm, use `npm run <script>`.
+Scaffold-HBAR dApp: **Bonzo Finance** lending on Hedera (testnet/mainnet). Stack: Next.js App Router, RainbowKit, wagmi, viem, Hardhat, DaisyUI. Yarn workspaces — prefer `yarn <script>`.
 
 ## Do not
 
 - Commit `.env`, `.env.local`, private keys, or operator credentials
-- Fork or redeploy Bonzo core contracts — use external addresses in `packages/nextjs/utils/bonzo/addresses.ts` and `externalContracts.ts`
-- Add decorative SDK imports that are unused by the lending flow
+- Fork or redeploy Bonzo — use [`packages/nextjs/utils/bonzo/addresses.ts`](./packages/nextjs/utils/bonzo/addresses.ts)
+- Add unused SDK imports to “tick a box”
 
 ## Commands
 
@@ -18,40 +16,43 @@ Package manager: Yarn workspaces (`packageManager` in root `package.json`). Pref
 yarn next:dev
 yarn next:build
 yarn lint
+yarn test
 yarn hardhat:compile
-yarn hardhat:test
 yarn hardhat:deploy --network localhost
 yarn hardhat:deploy --network hederaTestnet
 yarn hardhat:account:generate
-yarn hardhat:account:import
 ```
 
 ## Layout
 
 ### Hardhat (`packages/hardhat`)
 
-- `contracts/AuditAnchor.sol` — on-chain lending action anchors (+ optional HCS ref)
-- `deploy/00_deploy_audit_anchor.ts`
-- `test/AuditAnchor.test.ts`
-- Config: `hardhat.config.ts` (`hederaTestnet` 296, `hederaMainnet` 295)
+| Path | Role |
+| --- | --- |
+| `contracts/AuditAnchor.sol` | On-chain lending action anchors |
+| `deploy/00_deploy_audit_anchor.ts` | Deploy script |
+| `test/AuditAnchor.test.ts` | Unit tests |
+| `hardhat.config.ts` | `hederaTestnet` (296), `hederaMainnet` (295) |
 
-After deploy, ABIs land in `packages/nextjs/contracts/deployedContracts.ts`.
+Deploy updates `packages/nextjs/contracts/deployedContracts.ts`.
 
 ### Frontend (`packages/nextjs`)
 
 | Path | Role |
 | --- | --- |
-| `utils/bonzo/addresses.ts` | Bonzo core + reserve addresses |
-| `utils/bonzo/abis.ts` | LendingPool, DataProvider, WETHGateway, ERC20, AuditAnchor ABIs |
-| `hooks/bonzo/useBonzoMarkets.ts` | Reserve APYs / liquidity |
+| `utils/bonzo/addresses.ts` | Bonzo + reserve addresses |
+| `utils/bonzo/abis.ts` | LendingPool, DataProvider, ERC20, AuditAnchor |
+| `hooks/bonzo/useBonzoMarkets.ts` | Markets |
 | `hooks/bonzo/useBonzoUserAccount.ts` | Portfolio / health |
-| `hooks/bonzo/useBonzoLending.ts` | Approve + deposit/withdraw/borrow/repay + HCS/anchor side effects |
-| `hooks/bonzo/useHtsAssociation.ts` | Mirror Node association check |
-| `components/bonzo/LendingForm.tsx` | Shared action UI |
-| `app/markets`, `supply`, `borrow`, `portfolio`, `audit` | Product routes |
-| `app/api/hcs/*` | Topic create/submit + mirror message read |
-| `services/hcs/server.ts` | Hiero SDK operator helpers (server-only) |
-| `contracts/externalContracts.ts` | Bonzo + WHBAR/USDC wired for scaffold hooks |
+| `hooks/bonzo/useBonzoLending.ts` | Lending writes + HCS/anchor side effects |
+| `hooks/bonzo/useHtsAssociation.ts` | Mirror Node association |
+| `components/bonzo/LendingForm.tsx` | Shared form UI |
+| `app/{markets,supply,borrow,portfolio,audit}` | Product routes |
+| `app/api/hcs/*` | Topic create / submit / messages |
+| `services/hcs/server.ts` | Hiero SDK (server-only) |
+| `contracts/externalContracts.ts` | Bonzo wired for scaffold hooks |
+
+Docs: [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md).
 
 ### HCS message schema
 
@@ -61,21 +62,16 @@ After deploy, ABIs land in `packages/nextjs/contracts/deployedContracts.ts`.
   "asset": "0x…",
   "amount": "1.0",
   "txHash": "0x…",
-  "symbol": "WHBAR",
+  "symbol": "USDC",
   "timestamp": "ISO-8601",
   "protocol": "bonzo",
   "template": "scaffold-hbar-bonzo-lend"
 }
 ```
 
-Env (Next.js): `HEDERA_OPERATOR_ID`, `HEDERA_OPERATOR_KEY`, `HCS_AUDIT_TOPIC_ID`.
+Env: `HEDERA_OPERATOR_ID`, `HEDERA_OPERATOR_KEY`, `HCS_AUDIT_TOPIC_ID` (never `NEXT_PUBLIC_*`).
 
-## Frontend contract patterns
-
-Use scaffold hooks for **deployed** contracts (`AuditAnchor` after deploy):
-
-- `useScaffoldReadContract` / `useScaffoldWriteContract`
-- Prefer direct `useReadContract` / `useWriteContract` for Bonzo externals (already wrapped in `hooks/bonzo/*`)
+## Patterns
 
 ```typescript
 import { useBonzoLending } from "~~/hooks/bonzo/useBonzoLending";
@@ -84,11 +80,7 @@ const { run, pending } = useBonzoLending();
 await run("deposit", "USDC", "10", 6);
 ```
 
-## Networks
-
-- Next: `scaffold.config.ts` — default target includes Hedera testnet
-- Hardhat: `hederaTestnet` / `hederaMainnet`
-- Bonzo addresses keyed by chain id in `utils/bonzo/addresses.ts`
+WHBAR: `amount` is 8 decimals; `msg.value = amount * 1e10`. Prefer `hooks/bonzo` over raw contract calls in pages.
 
 ## Style
 
@@ -99,4 +91,4 @@ await run("deposit", "USDC", "10", 6);
 | `CONSTANT_CASE` | constants |
 | `snake_case` | Hardhat deploy filenames |
 
-Imports use the `~~` alias. App Router pages that use hooks need `"use client"`. Prefer DaisyUI (`btn`, `table`, `alert`) over one-off Tailwind chrome.
+Use `~~` imports. App Router pages that use hooks need `"use client"`. Prefer DaisyUI (`btn`, `table`, `alert`).

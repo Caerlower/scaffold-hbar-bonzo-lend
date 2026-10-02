@@ -1,7 +1,29 @@
 {
   "name": "scaffold-hbar-bonzo-lend",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
+  "description": "Scaffold-HBAR external template: Bonzo Finance lending on Hedera with HTS checks, HCS audit trail, and AuditAnchor.",
+  "homepage": "https://github.com/Caerlower/hedra-template-bounty#readme",
+  "bugs": {
+    "url": "https://github.com/Caerlower/hedra-template-bounty/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Caerlower/hedra-template-bounty.git"
+  },
+  "license": "MIT",
+  "author": "Caerlower",
+  "keywords": [
+    "hedera",
+    "scaffold-hbar",
+    "bonzo",
+    "defi",
+    "lending",
+    "hts",
+    "hcs",
+    "nextjs",
+    "hardhat"
+  ],
   "workspaces": {
     "packages": [
       "packages/hardhat",
@@ -9,6 +31,7 @@
     ]
   },
   "scripts": {
+    "build": "yarn hardhat:compile && yarn next:build",
     "format": "yarn next:format && yarn hardhat:format",
     "hardhat:account": "yarn workspace @sh/hardhat account",
     "hardhat:account:generate": "yarn workspace @sh/hardhat account:generate",
@@ -36,7 +59,8 @@
     "next:start": "yarn workspace @sh/nextjs start",
     "postinstall": "husky",
     "precommit": "lint-staged",
-    "lint-staged": "lint-staged"
+    "lint-staged": "lint-staged",
+    "test": "yarn hardhat:test"
   },
   "packageManager": "yarn@3.2.3",
   "devDependencies": {
