@@ -59,8 +59,8 @@ export const LendingForm = ({ action, reserves, defaultSymbol, title, descriptio
       {poolPaused && (
         <div className="alert alert-error text-sm py-3">
           <span>
-            Bonzo LendingPool is paused on-chain (<code className="text-xs">paused() = true</code>). Writes will
-            revert until Bonzo unpauses.
+            Bonzo LendingPool is paused on-chain (<code className="text-xs">paused() = true</code>). Writes will revert
+            until Bonzo unpauses.
           </span>
         </div>
       )}

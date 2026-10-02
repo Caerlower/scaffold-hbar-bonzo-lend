@@ -44,7 +44,8 @@ const MarketsPage: NextPage = () => {
         <div className="alert alert-info text-sm mb-4">
           <span>
             Supply/borrow APYs and available liquidity are <strong>0</strong> on-chain right now — this Bonzo testnet
-            pool has no deposits yet (writes currently revert with <code className="text-xs">CALLER_NOT_AUTHORIZED</code>
+            pool has no deposits yet (writes currently revert with{" "}
+            <code className="text-xs">CALLER_NOT_AUTHORIZED</code>
             ). LTV / status below still come from live reserve config.
           </span>
         </div>
@@ -70,7 +71,7 @@ const MarketsPage: NextPage = () => {
             <tbody>
               {markets.map(m => {
                 const decimals =
-                  m.decimals !== undefined ? Number(m.decimals) : m.tokenDecimals ?? (m.symbol === "USDC" ? 6 : 8);
+                  m.decimals !== undefined ? Number(m.decimals) : (m.tokenDecimals ?? (m.symbol === "USDC" ? 6 : 8));
                 const liq =
                   m.availableLiquidity !== undefined ? formatUnits(m.availableLiquidity, decimals) : undefined;
                 const scan = key ? `${HASHSCAN_BASE[key]}/token/${m.token}` : undefined;
@@ -89,9 +90,7 @@ const MarketsPage: NextPage = () => {
                     <td>{formatRayApy(m.liquidityRate)}</td>
                     <td>{formatRayApy(m.variableBorrowRate)}</td>
                     <td className="font-mono text-sm">
-                      {liq !== undefined
-                        ? Number(liq).toLocaleString(undefined, { maximumFractionDigits: 4 })
-                        : "—"}
+                      {liq !== undefined ? Number(liq).toLocaleString(undefined, { maximumFractionDigits: 4 }) : "—"}
                     </td>
                     <td className="font-mono text-sm">{formatBps(m.ltvBps)}</td>
                     <td>
