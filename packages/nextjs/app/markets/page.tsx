@@ -6,10 +6,10 @@ import { formatUnits } from "viem";
 import { useBonzoMarkets } from "~~/hooks/bonzo/useBonzoMarkets";
 import { useTargetNetwork } from "~~/hooks/scaffold-hbar";
 import { HASHSCAN_BASE, bonzoNetworkKey } from "~~/utils/bonzo/addresses";
-import { formatRayApy, shortenAddress } from "~~/utils/bonzo/format";
+import { formatBps, formatRayApy, shortenAddress } from "~~/utils/bonzo/format";
 
 const MarketsPage: NextPage = () => {
-  const { markets, isLoading, supported, onChainReserves } = useBonzoMarkets();
+  const { markets, isLoading, supported, onChainReserves, emptyPool } = useBonzoMarkets();
   const { targetNetwork } = useTargetNetwork();
   const key = bonzoNetworkKey(targetNetwork.id);
 
@@ -27,7 +27,7 @@ const MarketsPage: NextPage = () => {
         <div>
           <h1 className="text-3xl font-bold m-0">Markets</h1>
           <p className="text-base-content/70 m-0 mt-1">
-            Bonzo Finance reserves on {targetNetwork.name}. Data from ProtocolDataProvider.
+            Bonzo Finance reserves on {targetNetwork.name}. Live data from ProtocolDataProvider.
           </p>
         </div>
         <div className="flex gap-2">
@@ -39,6 +39,16 @@ const MarketsPage: NextPage = () => {
           </Link>
         </div>
       </div>
+
+      {emptyPool && !isLoading && (
+        <div className="alert alert-info text-sm mb-4">
+          <span>
+            Supply/borrow APYs and available liquidity are <strong>0</strong> on-chain right now — this Bonzo testnet
+            pool has no deposits yet (writes currently revert with <code className="text-xs">CALLER_NOT_AUTHORIZED</code>
+            ). LTV / status below still come from live reserve config.
+          </span>
+        </div>
+      )}
 
       {isLoading ? (
         <div className="flex justify-center py-16">
@@ -53,13 +63,16 @@ const MarketsPage: NextPage = () => {
                 <th>Supply APY</th>
                 <th>Borrow APY</th>
                 <th>Available</th>
+                <th>LTV</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
               {markets.map(m => {
-                const decimals = m.decimals !== undefined ? Number(m.decimals) : m.symbol === "USDC" ? 6 : 8;
-                const liq = m.availableLiquidity !== undefined ? formatUnits(m.availableLiquidity, decimals) : "—";
+                const decimals =
+                  m.decimals !== undefined ? Number(m.decimals) : m.tokenDecimals ?? (m.symbol === "USDC" ? 6 : 8);
+                const liq =
+                  m.availableLiquidity !== undefined ? formatUnits(m.availableLiquidity, decimals) : undefined;
                 const scan = key ? `${HASHSCAN_BASE[key]}/token/${m.token}` : undefined;
                 return (
                   <tr key={m.symbol}>
@@ -76,10 +89,15 @@ const MarketsPage: NextPage = () => {
                     <td>{formatRayApy(m.liquidityRate)}</td>
                     <td>{formatRayApy(m.variableBorrowRate)}</td>
                     <td className="font-mono text-sm">
-                      {Number(liq).toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                      {liq !== undefined
+                        ? Number(liq).toLocaleString(undefined, { maximumFractionDigits: 4 })
+                        : "—"}
                     </td>
+                    <td className="font-mono text-sm">{formatBps(m.ltvBps)}</td>
                     <td>
-                      {m.isActive === false ? (
+                      {m.isFrozen ? (
+                        <span className="badge badge-warning badge-outline">Frozen</span>
+                      ) : m.isActive === false ? (
                         <span className="badge badge-ghost">Inactive</span>
                       ) : m.borrowingEnabled ? (
                         <span className="badge badge-success badge-outline">Borrowable</span>

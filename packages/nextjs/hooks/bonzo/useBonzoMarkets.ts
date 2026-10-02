@@ -6,14 +6,17 @@ import { useTargetNetwork } from "~~/hooks/scaffold-hbar";
 import { protocolDataProviderAbi } from "~~/utils/bonzo/abis";
 import { type BonzoReserveMeta, getBonzoCore, getBonzoReserves } from "~~/utils/bonzo/addresses";
 
-export type MarketRow = Omit<BonzoReserveMeta, never> & {
+export type MarketRow = BonzoReserveMeta & {
   availableLiquidity?: bigint;
   liquidityRate?: bigint;
   variableBorrowRate?: bigint;
   /** On-chain decimals from ProtocolDataProvider config */
   decimals?: bigint;
+  ltvBps?: bigint;
+  liquidationThresholdBps?: bigint;
   borrowingEnabled?: boolean;
   isActive?: boolean;
+  isFrozen?: boolean;
 };
 
 /**
@@ -50,6 +53,7 @@ export const useBonzoMarkets = () => {
     data: reserveDataResults,
     isLoading: loadingReserve,
     refetch: refetchReserve,
+    isError: reserveError,
   } = useReadContracts({
     contracts: reserveDataContracts,
     query: { enabled: !!core && reserves.length > 0, staleTime: 12_000 },
@@ -74,29 +78,79 @@ export const useBonzoMarkets = () => {
 
   const markets: MarketRow[] = useMemo(() => {
     return reserves.map((r, i) => {
-      const rd = reserveDataResults?.[i]?.result as
+      const rdRaw = reserveDataResults?.[i]?.result as
         | readonly [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, number]
+        | {
+            availableLiquidity: bigint;
+            totalStableDebt: bigint;
+            totalVariableDebt: bigint;
+            liquidityRate: bigint;
+            variableBorrowRate: bigint;
+          }
         | undefined;
-      const cfg = configResults?.[i]?.result as
+      const cfgRaw = configResults?.[i]?.result as
         | readonly [bigint, bigint, bigint, bigint, bigint, boolean, boolean, boolean, boolean, boolean]
+        | {
+            decimals: bigint;
+            ltv: bigint;
+            liquidationThreshold: bigint;
+            borrowingEnabled: boolean;
+            isActive: boolean;
+            isFrozen: boolean;
+          }
         | undefined;
+
+      const rd = Array.isArray(rdRaw)
+        ? {
+            availableLiquidity: rdRaw[0],
+            liquidityRate: rdRaw[3],
+            variableBorrowRate: rdRaw[4],
+          }
+        : rdRaw
+          ? {
+              availableLiquidity: rdRaw.availableLiquidity,
+              liquidityRate: rdRaw.liquidityRate,
+              variableBorrowRate: rdRaw.variableBorrowRate,
+            }
+          : undefined;
+
+      const cfg = Array.isArray(cfgRaw)
+        ? {
+            decimals: cfgRaw[0],
+            ltv: cfgRaw[1],
+            liquidationThreshold: cfgRaw[2],
+            borrowingEnabled: cfgRaw[6],
+            isActive: cfgRaw[8],
+            isFrozen: cfgRaw[9],
+          }
+        : cfgRaw;
+
       return {
         ...r,
-        availableLiquidity: rd?.[0],
-        liquidityRate: rd?.[3],
-        variableBorrowRate: rd?.[4],
-        decimals: cfg?.[0],
-        borrowingEnabled: cfg?.[6],
-        isActive: cfg?.[8],
+        availableLiquidity: rd?.availableLiquidity,
+        liquidityRate: rd?.liquidityRate,
+        variableBorrowRate: rd?.variableBorrowRate,
+        decimals: cfg?.decimals,
+        ltvBps: cfg?.ltv,
+        liquidationThresholdBps: cfg?.liquidationThreshold,
+        borrowingEnabled: cfg?.borrowingEnabled,
+        isActive: cfg?.isActive,
+        isFrozen: cfg?.isFrozen,
       };
     });
   }, [reserves, reserveDataResults, configResults]);
 
+  const emptyPool =
+    markets.length > 0 &&
+    markets.every(m => (m.availableLiquidity ?? 0n) === 0n && (m.liquidityRate ?? 0n) === 0n);
+
   return {
     core,
     markets,
+    emptyPool,
     onChainReserves,
     isLoading: loadingReserve || loadingConfig,
+    isError: reserveError,
     refetch: async () => {
       await Promise.all([refetchReserve(), refetchConfig()]);
     },

@@ -5,8 +5,15 @@ export const rayToPercent = (ray?: bigint): number => {
 };
 
 export const formatRayApy = (ray?: bigint): string => {
+  if (ray === undefined) return "—";
   const pct = rayToPercent(ray);
   return `${pct.toFixed(2)}%`;
+};
+
+/** Protocol config basis points (e.g. LTV 7500 → 75.00%) */
+export const formatBps = (bps?: bigint): string => {
+  if (bps === undefined) return "—";
+  return `${(Number(bps) / 100).toFixed(2)}%`;
 };
 
 export const shortenAddress = (address: string, chars = 4): string => {
