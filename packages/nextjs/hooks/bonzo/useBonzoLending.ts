@@ -13,6 +13,7 @@ import {
   getBonzoReserves,
 } from "~~/utils/bonzo/addresses";
 import { type LendingAction, actionToAnchorType } from "~~/utils/bonzo/format";
+import { sendHederaWalletTx } from "~~/utils/bonzo/sendHederaWalletTx";
 import type { ContractName } from "~~/utils/scaffold-hbar/contract";
 import { notification } from "~~/utils/scaffold-hbar/notification";
 
@@ -108,12 +109,18 @@ export const useBonzoLending = () => {
     }
   }, [address, walletClient, targetNetwork, switchChainAsync, refetchWalletClient]);
 
-  /** Direct wallet write (skips wagmi simulate — Hedera HTS often reverts in eth_call before the popup). */
+  /** Direct wallet write — Hedera-aware send helper (MetaMask writeContract / WC sign+broadcast). */
   const walletWrite = useCallback(
-    async (params: Parameters<NonNullable<typeof walletClient>["writeContract"]>[0]) => {
+    async (params: {
+      address: Address;
+      abi: any;
+      functionName: string;
+      args?: readonly unknown[];
+      value?: bigint;
+    }) => {
       await ensureWalletReady();
       if (!walletClient || !address) throw new Error("Wallet client not ready");
-      notification.info("Check HashPack (or your wallet) to confirm…");
+      notification.info("Approve the transaction in HashPack / MetaMask…");
 
       // HashPack often shows a bare "Error!" if it cannot estimate gas for HTS ERC-20 calls.
       // Pre-estimate (or fall back to a high Hedera-safe limit) and send legacy gasPrice.
@@ -130,21 +137,24 @@ export const useBonzoLending = () => {
           /* keep fallback */
         }
       }
-      const gasPrice = publicClient ? await publicClient.getGasPrice().catch(() => undefined) : undefined;
+      const gasPrice =
+        (publicClient ? await publicClient.getGasPrice().catch(() => undefined) : undefined) ?? 750_000_000_000n; // 750 gwei fallback (Hedera JSON-RPC)
 
       const hash = await writeTx(() =>
-        walletClient.writeContract({
-          ...params,
-          account: address,
-          chain: targetNetwork,
+        sendHederaWalletTx(walletClient, params as any, {
+          from: address,
+          chain: walletClient.chain ?? targetNetwork,
+          chainId: targetNetwork.id,
           gas,
-          ...(gasPrice !== undefined ? { gasPrice, type: "legacy" as const } : {}),
+          gasPrice,
+          publicClient: publicClient ?? undefined,
+          connectorId: connector?.id ?? connector?.name,
         }),
       );
       if (!hash) throw new Error("Transaction was cancelled or failed to submit");
       return hash;
     },
-    [ensureWalletReady, walletClient, writeTx, address, targetNetwork, publicClient],
+    [ensureWalletReady, walletClient, writeTx, address, targetNetwork, publicClient, connector],
   );
 
   const ensureAllowance = useCallback(
@@ -240,12 +250,12 @@ export const useBonzoLending = () => {
         return;
       }
 
-      // HTS association required for ERC-20s AND WHBAR (HTS wrapper) before approve/transfer.
-      if (action === "deposit" || action === "repay") {
+      // HTS association required to hold/receive the token (supply, repay, and borrow).
+      if (action === "deposit" || action === "repay" || action === "borrow") {
         const associated = await isTokenAssociated(targetNetwork.id, accountId, reserve.token);
         if (associated === false) {
           notification.error(
-            `${reserve.symbol} is not associated. In HashPack → Associate, paste Token ID ${reserve.tokenId || reserve.token} (use 0.0.x, not 0x…), then retry.`,
+            `${reserve.symbol} is not associated on ${accountId}. Copy Token ID ${reserve.tokenId || reserve.token} → associate in HashPack (MetaMask does not skip this), then retry.`,
           );
           return;
         }
@@ -398,9 +408,8 @@ export const useBonzoLending = () => {
           );
         }
       } catch (e: any) {
-        console.error(e);
-        const msg = e?.shortMessage || e?.message || `${action} failed`;
-        notification.error(msg);
+        // useTransactor already shows a toast for wallet/RPC failures — avoid duplicate popups.
+        console.error("Bonzo lending action failed", e);
       } finally {
         setPending(false);
       }
@@ -429,6 +438,8 @@ export const useBonzoLending = () => {
     accountId,
     accountIdLoading,
     isBurner: connector?.id === "burnerWallet",
+    connectorId: connector?.id,
+    connectorName: connector?.name,
     hbarBalance: hbarBalance?.value,
     walletChainId: chain?.id,
     wrongNetwork: !!chain && chain.id !== targetNetwork.id,

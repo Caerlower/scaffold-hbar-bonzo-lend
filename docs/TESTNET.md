@@ -26,16 +26,16 @@ Confirm on Hashscan (contract + create transaction).
 yarn next:dev
 ```
 
-1. Connect HashPack (**Testnet** — not Mainnet). Disconnect/reconnect if the wallet popup shows Mainnet.
+1. Connect **MetaMask** on Hedera Testnet (chain id **296**, RPC `https://testnet.hashio.io/api`) for contract calls. Use **HashPack** to associate HTS Token IDs (`0.0.x`).
 2. Get HTS assets from Bonzo Discord `#testnet-faucet` or SaucerSwap testnet.
-3. Associate tokens in the wallet if prompted. HashPack expects Token IDs (`0.0.x`), e.g. USDC `0.0.5449`, WHBAR `0.0.15058` — not the `0x…` EVM form.
+3. Associate tokens in HashPack if prompted (e.g. USDC `0.0.5449`, WHBAR `0.0.15058`).
 4. Prefer **USDC** for the first supply path. WHBAR wraps native HBAR via the helper then approves/deposits.
 
 ### Known limitation (Bonzo testnet writes)
 
-Core addresses match [Bonzo lend-contracts](https://docs.bonzo.finance/hub/developer/bonzo-lend/lend-contracts) (LendingPool `0xf67D…EbC2`). USDC `0.0.5449` is listed, active, and borrow/collateral enabled on-chain.
+Core addresses match [Bonzo lend-contracts](https://docs.bonzo.finance/hub/developer/bonzo-lend/lend-contracts) (LendingPool `0xf67D…EbC2`). USDC `0.0.5449` is listed and active on-chain.
 
-However, as of **2026-10-02**, deposits to that pool revert with `CALLER_NOT_AUTHORIZED` (observed across many accounts; zero recent successful deposits). The previous pool (`0x7710…128c62`) remains `paused() = true`. Until Bonzo restores testnet lending, demo **Markets**, wallet/HTS UX, and **AuditAnchor** Hashscan proofs; do not treat a failed Bonzo supply as a template misconfiguration.
+As of **2026-10-02**, deposits revert with `CALLER_NOT_AUTHORIZED` (example: [0x3861…5f90](https://hashscan.io/testnet/transaction/0x38618e9496d4b7b4fd92520b0c5191ae7b799e6f6565734b1669d43cca4d5f90)). The previous pool (`0x7710…`) remains `paused() = true`. Demo **Markets**, HTS association UX, and **AuditAnchor** Hashscan proofs until Bonzo restores testnet lending.
 
 ## 4. Optional HCS topic
 
@@ -58,6 +58,7 @@ curl -X POST http://localhost:3000/api/hcs/topic
 | AuditAnchor contract | https://hashscan.io/testnet/contract/0x3e485CA75B4A49d186912Bb53C5BF1FEadF96d12 |
 | `recordAction` | https://hashscan.io/testnet/transaction/0xdc9d8da7cfa5b989432d93cd0221b21dcb290bc92ecb7ff2a6b8aff4d4b9f5c1 |
 | WHBAR wrap | https://hashscan.io/testnet/transaction/0x4d39d53f1dba03cd62b17f02f62bf2db4665f4843f4b8135c3fff6ef0c96ed1b |
+| Bonzo deposit revert (`CALLER_NOT_AUTHORIZED`) | https://hashscan.io/testnet/transaction/0x38618e9496d4b7b4fd92520b0c5191ae7b799e6f6565734b1669d43cca4d5f90 |
 
 Mirror Node:
 

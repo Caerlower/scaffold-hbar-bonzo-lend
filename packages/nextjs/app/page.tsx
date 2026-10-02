@@ -90,7 +90,8 @@ const Home: NextPage = () => {
             <div className="flex flex-col items-center gap-2">
               <p className="font-semibold text-sm text-base-content/70 m-0">Connect a Hedera testnet wallet to begin</p>
               <p className="text-xs text-base-content/50 m-0 max-w-md">
-                Use HashPack (or another Hedera wallet) on testnet. Fund HBAR from the Portal faucet first.
+                Prefer MetaMask on Hedera Testnet (296) for contract calls. Use HashPack to associate HTS Token IDs.
+                Fund HBAR from the Portal faucet first.
               </p>
             </div>
           )}

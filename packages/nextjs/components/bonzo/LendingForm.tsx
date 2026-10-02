@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useAccount } from "wagmi";
+import { CheckCircleIcon, DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 import { useBonzoLending } from "~~/hooks/bonzo/useBonzoLending";
 import { useBonzoPoolPaused } from "~~/hooks/bonzo/useBonzoPoolPaused";
 import { useHtsAssociation } from "~~/hooks/bonzo/useHtsAssociation";
+import { useCopyToClipboard } from "~~/hooks/scaffold-hbar";
 import type { BonzoReserveMeta } from "~~/utils/bonzo/addresses";
 import type { LendingAction } from "~~/utils/bonzo/format";
 
@@ -16,19 +18,30 @@ type LendingFormProps = {
   description: string;
 };
 
+type CopyField = "tokenId" | "evm";
+
 export const LendingForm = ({ action, reserves, defaultSymbol, title, description }: LendingFormProps) => {
   const [symbol, setSymbol] = useState(defaultSymbol || reserves[0]?.symbol || "USDC");
   const [amount, setAmount] = useState("");
-  const [decimals, setDecimals] = useState(symbol === "USDC" ? 6 : 8);
+  const [copiedField, setCopiedField] = useState<CopyField | null>(null);
   const { isConnected } = useAccount();
   const selected = reserves.find(r => r.symbol === symbol);
+  const decimals = selected?.tokenDecimals ?? 8;
   const { associated, loading: assocLoading, accountId: assocAccountId } = useHtsAssociation(selected?.token);
   const { run, pending, supported, accountId, accountIdLoading, isBurner, hbarBalance, wrongNetwork, walletChainId } =
     useBonzoLending();
   const { paused: poolPaused } = useBonzoPoolPaused();
+  const { copyToClipboard } = useCopyToClipboard();
 
   const hederaReady = !!accountId;
   const hasGas = hbarBalance !== undefined && hbarBalance > 0n;
+  const needsAssociation = associated === false && (action === "deposit" || action === "repay" || action === "borrow");
+
+  const copyField = async (field: CopyField, value: string) => {
+    await copyToClipboard(value);
+    setCopiedField(field);
+    window.setTimeout(() => setCopiedField(current => (current === field ? null : current)), 1600);
+  };
 
   return (
     <div className="bg-base-100 rounded-2xl border border-base-300 p-6 md:p-7 w-full max-w-md shadow-sm flex flex-col gap-5">
@@ -46,10 +59,8 @@ export const LendingForm = ({ action, reserves, defaultSymbol, title, descriptio
       {poolPaused && (
         <div className="alert alert-error text-sm py-3">
           <span>
-            Bonzo LendingPool is <strong>paused</strong> on this network right now (on-chain{" "}
-            <code className="text-xs">paused() = true</code>). Supply / borrow will revert with Aave error{" "}
-            <code className="text-xs">64</code> until Bonzo unpauses testnet. Markets reads and AuditAnchor still work
-            for the demo.
+            Bonzo LendingPool is paused on-chain (<code className="text-xs">paused() = true</code>). Writes will
+            revert until Bonzo unpauses.
           </span>
         </div>
       )}
@@ -57,9 +68,9 @@ export const LendingForm = ({ action, reserves, defaultSymbol, title, descriptio
       {wrongNetwork && (
         <div className="alert alert-error text-sm py-3">
           <span>
-            HashPack is on chain {walletChainId}
-            {walletChainId === 295 ? " (Mainnet)" : ""}. This page needs Hedera{" "}
-            <strong>Testnet (296)</strong>. In HashPack switch to Testnet, then disconnect & reconnect this site.
+            Wallet is on chain {walletChainId}
+            {walletChainId === 295 ? " (Mainnet)" : ""}. Switch to Hedera <strong>Testnet (296)</strong>, then
+            disconnect and reconnect.
           </span>
         </div>
       )}
@@ -68,15 +79,15 @@ export const LendingForm = ({ action, reserves, defaultSymbol, title, descriptio
         <div className="alert alert-warning text-sm py-3">
           <span>
             {isBurner
-              ? "Burner wallet is not a Hedera account (0 HBAR / never funded). Disconnect it, then connect HashPack or use “Get testnet HBAR”."
-              : "This address is not on Hedera yet. Fund it with testnet HBAR so Mirror Node creates the account."}
+              ? "Burner wallet is not a Hedera account. Disconnect it and connect MetaMask or HashPack on testnet."
+              : "This address is not on Hedera yet. Fund it with testnet HBAR first."}
           </span>
         </div>
       )}
 
       {isConnected && hederaReady && !hasGas && (
         <div className="alert alert-warning text-sm py-3">
-          <span>Wallet has 0 HBAR for gas. Use “Get testnet HBAR” in the footer, then retry.</span>
+          <span>Wallet has 0 HBAR for gas. Use “Get testnet HBAR” in the footer.</span>
         </div>
       )}
 
@@ -88,85 +99,97 @@ export const LendingForm = ({ action, reserves, defaultSymbol, title, descriptio
           id={`${action}-asset`}
           className="select select-bordered w-full rounded-full"
           value={symbol}
-          onChange={e => {
-            const next = e.target.value;
-            setSymbol(next);
-            setDecimals(next === "USDC" ? 6 : 8);
-          }}
+          onChange={e => setSymbol(e.target.value)}
         >
           {reserves.map(r => (
             <option key={r.symbol} value={r.symbol}>
               {r.symbol}
-              {r.isNativeWrapped ? " · wraps native HBAR" : ""}
+              {r.isNativeWrapped ? " · wraps native HBAR" : ""} · {r.tokenDecimals} decimals
             </option>
           ))}
         </select>
       </div>
 
-      <div className="grid grid-cols-[1fr_5.5rem] gap-3 items-end">
-        <div className="flex flex-col gap-1.5 min-w-0">
-          <label htmlFor={`${action}-amount`} className="text-sm font-medium text-base-content/85">
-            Amount
-          </label>
-          <input
-            id={`${action}-amount`}
-            className="input input-bordered w-full rounded-full"
-            type="text"
-            inputMode="decimal"
-            placeholder="0.0"
-            value={amount}
-            onChange={e => setAmount(e.target.value)}
-            autoComplete="off"
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor={`${action}-decimals`} className="text-sm font-medium text-base-content/85">
-            Decimals
-          </label>
-          <input
-            id={`${action}-decimals`}
-            className="input input-bordered w-full rounded-full text-center tabular-nums px-2"
-            type="number"
-            min={0}
-            max={18}
-            value={decimals}
-            onChange={e => setDecimals(Number(e.target.value))}
-            title="Token decimals (USDC = 6, WHBAR = 8)"
-          />
-        </div>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor={`${action}-amount`} className="text-sm font-medium text-base-content/85">
+          Amount
+        </label>
+        <input
+          id={`${action}-amount`}
+          className="input input-bordered w-full rounded-full"
+          type="text"
+          inputMode="decimal"
+          placeholder="0.0"
+          value={amount}
+          onChange={e => setAmount(e.target.value)}
+          autoComplete="off"
+        />
       </div>
 
       {selected && (
-        <div className="rounded-2xl bg-base-200/70 px-3.5 py-3 text-sm space-y-1">
-          <p className="m-0 font-medium text-base-content/90">
-            {selected.isNativeWrapped ? "WHBAR (HTS) association" : "HTS association"}
-          </p>
-          {!isConnected ? (
-            <p className="m-0 text-base-content/55">Connect a wallet to check association.</p>
-          ) : accountIdLoading || assocLoading ? (
-            <p className="m-0 text-base-content/55">Checking Mirror Node…</p>
-          ) : !assocAccountId && !accountId ? (
-            <p className="m-0 text-warning">No Hedera account for this address yet — fund it before associating tokens.</p>
-          ) : associated === false ? (
-            <div className="space-y-1">
-              <p className="m-0 text-warning">
-                {symbol} is not associated{assocAccountId ? ` on ${assocAccountId}` : ""}.
-              </p>
-              <p className="m-0 text-base-content/60 text-xs leading-relaxed">
-                {selected.isNativeWrapped
-                  ? "Native HBAR still uses the WHBAR HTS token under the hood. "
-                  : ""}
-                HashPack → Assets → Associate → paste Token ID{" "}
-                <span className="font-mono font-semibold">
-                  {selected.tokenId || selected.token}
-                </span>
-                {selected.tokenId ? " (not the 0x address)" : ""}, then Supply again.
-              </p>
+        <div className="rounded-2xl bg-base-200/70 px-3.5 py-3 text-sm space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <p className="m-0 font-medium text-base-content/90">HTS association</p>
+            {!isConnected ? (
+              <p className="m-0 text-xs text-base-content/55">Connect wallet</p>
+            ) : accountIdLoading || assocLoading ? (
+              <p className="m-0 text-xs text-base-content/55">Checking…</p>
+            ) : associated === true ? (
+              <p className="m-0 text-xs text-success">Associated</p>
+            ) : associated === false ? (
+              <p className="m-0 text-xs text-warning">Not associated</p>
+            ) : (
+              <p className="m-0 text-xs text-base-content/55">Unknown</p>
+            )}
+          </div>
+
+          {selected.tokenId && (
+            <div className="flex items-center justify-between gap-2 rounded-xl bg-base-100 border border-base-300 px-3 py-2">
+              <div className="min-w-0">
+                <p className="m-0 text-[11px] uppercase tracking-wide text-base-content/50">Token ID</p>
+                <p className="m-0 font-mono text-sm font-semibold truncate">{selected.tokenId}</p>
+              </div>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm rounded-full gap-1 shrink-0"
+                onClick={() => void copyField("tokenId", selected.tokenId!)}
+                aria-label={`Copy Token ID ${selected.tokenId}`}
+              >
+                {copiedField === "tokenId" ? (
+                  <CheckCircleIcon className="h-4 w-4 text-success" />
+                ) : (
+                  <DocumentDuplicateIcon className="h-4 w-4" />
+                )}
+                <span className="text-xs">{copiedField === "tokenId" ? "Copied" : "Copy"}</span>
+              </button>
             </div>
-          ) : associated === true ? (
-            <p className="m-0 text-success">Associated on this account.</p>
-          ) : (
-            <p className="m-0 text-base-content/55">Could not verify association (Mirror Node).</p>
+          )}
+
+          <div className="flex items-center justify-between gap-2 rounded-xl bg-base-100 border border-base-300 px-3 py-2">
+            <div className="min-w-0">
+              <p className="m-0 text-[11px] uppercase tracking-wide text-base-content/50">EVM address</p>
+              <p className="m-0 font-mono text-xs truncate">{selected.token}</p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm rounded-full gap-1 shrink-0"
+              onClick={() => void copyField("evm", selected.token)}
+              aria-label={`Copy EVM address ${selected.token}`}
+            >
+              {copiedField === "evm" ? (
+                <CheckCircleIcon className="h-4 w-4 text-success" />
+              ) : (
+                <DocumentDuplicateIcon className="h-4 w-4" />
+              )}
+              <span className="text-xs">{copiedField === "evm" ? "Copied" : "Copy"}</span>
+            </button>
+          </div>
+
+          {associated === false && (
+            <p className="m-0 text-base-content/60 text-xs leading-relaxed">
+              Associate Token ID in HashPack (Assets → Associate) on{" "}
+              {assocAccountId || accountId || "your Hedera account"}. MetaMask does not perform HTS association.
+            </p>
           )}
         </div>
       )}
@@ -174,23 +197,11 @@ export const LendingForm = ({ action, reserves, defaultSymbol, title, descriptio
       <button
         type="button"
         className="btn btn-primary w-full rounded-full mt-1"
-        disabled={
-          pending ||
-          !supported ||
-          !amount ||
-          poolPaused ||
-          (associated === false && (action === "deposit" || action === "repay"))
-        }
+        disabled={pending || !supported || !amount || poolPaused || needsAssociation}
         onClick={() => void run(action, symbol, amount, decimals)}
       >
         {pending ? <span className="loading loading-spinner loading-sm" /> : title}
       </button>
-      {associated === false && (action === "deposit" || action === "repay") && (
-        <p className="m-0 text-xs text-center text-warning -mt-2">
-          Associate {symbol} in HashPack before supplying
-          {selected?.isNativeWrapped ? " (required even for native HBAR)" : ""}.
-        </p>
-      )}
     </div>
   );
 };

@@ -22,6 +22,8 @@ export type BonzoReserveMeta = {
   token: Address;
   aToken: Address;
   variableDebt: Address;
+  /** Token decimals used for amount parsing (USDC = 6, most HTS = 8) */
+  tokenDecimals: number;
   /** Hedera Token Service ID for HashPack association (e.g. 0.0.15058) */
   tokenId?: string;
   isNativeWrapped?: boolean;
@@ -56,6 +58,7 @@ export const BONZO_RESERVES: Record<BonzoNetworkKey, BonzoReserveMeta[]> = {
       symbol: "WHBAR",
       token: "0x0000000000000000000000000000000000003ad2",
       tokenId: "0.0.15058",
+      tokenDecimals: 8,
       aToken: "0xf594C3d27463bEd0f651847aa7d323908CB5FFaA",
       variableDebt: "0xF9f8309a8F55e8E480B214B6725F8419FA029D57",
       isNativeWrapped: true,
@@ -65,6 +68,7 @@ export const BONZO_RESERVES: Record<BonzoNetworkKey, BonzoReserveMeta[]> = {
       symbol: "USDC",
       token: "0x0000000000000000000000000000000000001549",
       tokenId: "0.0.5449",
+      tokenDecimals: 6,
       aToken: "0x1348D518996a26a774Eb005b925A655808265D39",
       variableDebt: "0xD2A4c538E7CABD2516C29Dbb962E45Ca86F3bB48",
     },
@@ -72,6 +76,7 @@ export const BONZO_RESERVES: Record<BonzoNetworkKey, BonzoReserveMeta[]> = {
       symbol: "SAUCE",
       token: "0x0000000000000000000000000000000000120f46",
       tokenId: "0.0.1183558",
+      tokenDecimals: 6,
       aToken: "0x89568c3cD65C54AC41158e2A03E747cCC091f0BE",
       variableDebt: "0x51c27355064F85de57C6965CeF9baBA08CcfF13C",
     },
@@ -79,6 +84,7 @@ export const BONZO_RESERVES: Record<BonzoNetworkKey, BonzoReserveMeta[]> = {
       symbol: "HBARX",
       token: "0x0000000000000000000000000000000000220ced",
       tokenId: "0.0.2231533",
+      tokenDecimals: 8,
       aToken: "0x259F2BE6542Bf882b6EA4ab157F4112F4Cec0666",
       variableDebt: "0x7f6A2Af6921915A80673da5d233710918A18Db75",
     },
@@ -86,6 +92,7 @@ export const BONZO_RESERVES: Record<BonzoNetworkKey, BonzoReserveMeta[]> = {
       symbol: "XSAUCE",
       token: "0x000000000000000000000000000000000015a59b",
       tokenId: "0.0.1418651",
+      tokenDecimals: 6,
       aToken: "0x7521De32AdC1743684c1d802F2C288c6cA867981",
       variableDebt: "0x91E0F09F55DC746Bd44c9AF4A9a8F3C9E50e3625",
     },
@@ -93,6 +100,7 @@ export const BONZO_RESERVES: Record<BonzoNetworkKey, BonzoReserveMeta[]> = {
       symbol: "KARATE",
       token: "0x00000000000000000000000000000000003991ed",
       tokenId: "0.0.3772909",
+      tokenDecimals: 8,
       aToken: "0x704cec3C19d306eD082377ae1d88F772c1C8D0de",
       variableDebt: "0x2EA9dA7FcbE59d8ceE7dCb9724BF8714Ae3677fd",
     },
@@ -101,6 +109,7 @@ export const BONZO_RESERVES: Record<BonzoNetworkKey, BonzoReserveMeta[]> = {
     {
       symbol: "WHBAR",
       token: "0x0000000000000000000000000000000000163b5a",
+      tokenDecimals: 8,
       aToken: "0x6e96a607F2F5657b39bf58293d1A006f9415aF32",
       variableDebt: "0xCD5A1FF3AD6EDd7e85ae6De3854f3915dD8c9103",
       isNativeWrapped: true,
@@ -108,12 +117,14 @@ export const BONZO_RESERVES: Record<BonzoNetworkKey, BonzoReserveMeta[]> = {
     {
       symbol: "USDC",
       token: "0x000000000000000000000000000000000006f89a",
+      tokenDecimals: 6,
       aToken: "0xB7687538c7f4CAD022d5e97CC778d0b46457c5DB",
       variableDebt: "0x8a90C2f80Fc266e204cb37387c69EA2ed42A3cc1",
     },
     {
       symbol: "SAUCE",
       token: "0x00000000000000000000000000000000000b2ad5",
+      tokenDecimals: 6,
       aToken: "0x2bcC0a304c0bc816D501c7C647D958b9A5bc716d",
       variableDebt: "0x736c5dbB8ADC643f04c1e13a9C25f28d3D4f0503",
     },

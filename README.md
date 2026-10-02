@@ -62,7 +62,7 @@ yarn next:dev
 | Node.js | ≥ **20.18.3** (see [`.nvmrc`](./.nvmrc)) |
 | Yarn | 3.x via Corepack |
 | Git | `user.name` / `user.email` set |
-| Wallet | HashPack (or another Hedera wallet) on **testnet** |
+| Wallet | **MetaMask** on Hedera Testnet (296) for contract calls; **HashPack** for HTS associate |
 
 **Testnet funds**
 
@@ -80,7 +80,7 @@ This template targets Bonzo’s **current** published testnet contracts ([lend-c
 | ProtocolDataProvider | `0x121A2AFFA5f595175E60E01EAeF0deC43Cc3b024` |
 | USDC (HTS) | `0x…1549` / Token ID `0.0.5449` (same token as SaucerSwap testnet) |
 
-**As of 2026-10-02:** market **reads** work. Live **supply / borrow** against Bonzo testnet revert on-chain (`CALLER_NOT_AUTHORIZED` on deposit). The older pool (`0x7710…`) is still `paused() = true`. The UI surfaces a pause / failure banner when writes cannot succeed. Your own **AuditAnchor** deploy remains the template’s on-chain proof of life independent of Bonzo’s testnet health.
+**As of 2026-10-02:** market **reads** work. Live **supply / borrow** against Bonzo testnet revert on-chain (`CALLER_NOT_AUTHORIZED` on deposit — e.g. [this USDC deposit](https://hashscan.io/testnet/transaction/0x38618e9496d4b7b4fd92520b0c5191ae7b799e6f6565734b1669d43cca4d5f90)). The older pool (`0x7710…`) is still `paused() = true`. Prefer **MetaMask** for EVM writes; use **HashPack** to associate Token IDs (`0.0.x`). Your **AuditAnchor** deploy remains the template’s on-chain proof of life independent of Bonzo’s testnet health.
 
 ---
 

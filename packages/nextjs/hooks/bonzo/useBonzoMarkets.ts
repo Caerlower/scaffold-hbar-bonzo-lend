@@ -6,10 +6,11 @@ import { useTargetNetwork } from "~~/hooks/scaffold-hbar";
 import { protocolDataProviderAbi } from "~~/utils/bonzo/abis";
 import { type BonzoReserveMeta, getBonzoCore, getBonzoReserves } from "~~/utils/bonzo/addresses";
 
-export type MarketRow = BonzoReserveMeta & {
+export type MarketRow = Omit<BonzoReserveMeta, never> & {
   availableLiquidity?: bigint;
   liquidityRate?: bigint;
   variableBorrowRate?: bigint;
+  /** On-chain decimals from ProtocolDataProvider config */
   decimals?: bigint;
   borrowingEnabled?: boolean;
   isActive?: boolean;
