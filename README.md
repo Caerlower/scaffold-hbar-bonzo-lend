@@ -1,0 +1,137 @@
+# Scaffold-HBAR — Bonzo Lend
+
+Production-oriented Scaffold-HBAR template for **Bonzo Finance** lending on Hedera. Supply, borrow, repay, and withdraw against live Bonzo pools, with HTS association checks, an optional HCS audit topic, and an on-chain `AuditAnchor` contract.
+
+```bash
+npm create scaffold-hbar@latest my-bonzo-app -- --template <your-github-user>/hedra-template-bounty
+```
+
+Replace `<your-github-user>/hedra-template-bounty` with this repository once published.
+
+## Why this template
+
+Bonzo is an Aave v2–compatible lending protocol deployed on Hedera. Removing Bonzo removes the product — the integration is load-bearing, not decorative. The template also composes:
+
+| Layer | Role |
+| --- | --- |
+| **Bonzo LendingPool / WETHGateway / ProtocolDataProvider** | Markets, supply, borrow, repay, withdraw |
+| **HTS** | Association status via Mirror Node before ERC-20 approve/deposit |
+| **HCS** | Optional immutable JSON audit log of lending actions |
+| **AuditAnchor.sol** | On-chain anchor of action + optional HCS sequence |
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) ≥ 20.18.3
+- [Git](https://git-scm.com/) with `user.name` / `user.email`
+- Yarn (recommended) via Corepack: `corepack enable && corepack prepare yarn@stable --activate`
+- Hedera testnet account with HBAR from the [Portal faucet](https://portal.hedera.com/faucet)
+- Bonzo testnet HTS assets (USDC, SAUCE, HBARX, …) from Bonzo Discord `#testnet-faucet` or [SaucerSwap testnet](https://testnet.saucerswap.finance/) — see [Bonzo testnet guide](https://docs.bonzo.finance/hub/bonzo-lend/bonzo-lend-testnet)
+
+## Quick start (this repo)
+
+```bash
+yarn install
+
+# Terminal A — frontend (talks to live Bonzo on Hedera testnet)
+yarn next:dev
+
+# Optional local fork + AuditAnchor
+yarn hardhat:chain
+yarn hardhat:deploy --network localhost
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+### Deploy AuditAnchor to Hedera testnet
+
+```bash
+yarn hardhat:account:generate   # or :import
+# Fund the deployer, set alias in packages/hardhat/.env (see .env.example)
+yarn hardhat:deploy --network hederaTestnet
+```
+
+ABIs/addresses are written to `packages/nextjs/contracts/deployedContracts.ts`.
+
+### Optional HCS audit topic
+
+In `packages/nextjs/.env.local`:
+
+```bash
+HEDERA_OPERATOR_ID=0.0.xxxxx
+HEDERA_OPERATOR_KEY=302e...   # or 0x-prefixed ECDSA
+HCS_AUDIT_TOPIC_ID=0.0.yyyyy  # after create
+```
+
+Then either call `POST /api/hcs/topic` once and persist the returned id as `HCS_AUDIT_TOPIC_ID`, or create a topic with the Hiero SDK and set it yourself. Successful lending txs call `POST /api/hcs/submit` and optionally `AuditAnchor.recordAction`.
+
+## App routes
+
+| Route | Purpose |
+| --- | --- |
+| `/` | Overview + quick start |
+| `/markets` | Live reserve APYs and liquidity |
+| `/supply` | Deposit / withdraw (WHBAR via gateway) |
+| `/borrow` | Borrow / repay (variable rate) |
+| `/portfolio` | Collateral, debt, health factor |
+| `/audit` | HCS messages + AuditAnchor count |
+
+## Environment
+
+See:
+
+- [`packages/hardhat/.env.example`](packages/hardhat/.env.example)
+- [`packages/nextjs/.env.example`](packages/nextjs/.env.example)
+
+Never commit `.env` / `.env.local` or private keys.
+
+## Architecture
+
+```
+Wallet (RainbowKit / wagmi)
+    │
+    ├─► Bonzo LendingPool (deposit / withdraw / borrow / repay)
+    ├─► Bonzo WETHGateway (native HBAR ↔ WHBAR)
+    ├─► ProtocolDataProvider (markets + user positions)
+    ├─► Mirror Node (HTS association + HCS message reads)
+    ├─► Next.js API (/api/hcs/*) ──► HCS topic (operator key)
+    └─► AuditAnchor (optional on-chain record)
+```
+
+Core testnet addresses (from [Bonzo supply-scripts](https://github.com/Bonzo-Labs/supply-scripts)):
+
+- LendingPool: `0x7710a96b01e02eD00768C3b39BfA7B4f1c128c62`
+- ProtocolDataProvider: `0xe7432d9012d2a6cd811FDf42ecE43a0aa680c958`
+- WETHGateway: `0xA824820e35D6AE4D368153e83b7920B2DC3Cf964`
+
+## Quality commands
+
+```bash
+yarn lint
+yarn hardhat:test
+yarn next:build
+yarn hardhat:compile
+```
+
+## Verifiable testnet transactions
+
+Follow **[SUBMISSION.md](SUBMISSION.md)** to fund a deployer, deploy `AuditAnchor`, and record Hashscan links here:
+
+- AuditAnchor deploy: _pending — see SUBMISSION.md_
+- Sample Bonzo deposit: _pending — see SUBMISSION.md_
+
+Mirror Node examples:
+
+- Topic messages: `https://testnet.mirrornode.hedera.com/api/v1/topics/<TOPIC_ID>/messages`
+- Contract: `https://hashscan.io/testnet/contract/<ADDRESS>`
+
+## Licence
+
+MIT — see [`LICENCE`](LICENCE).
+
+## Links
+
+- [Bonzo Finance](https://bonzo.finance/) / [testnet app](https://testnet.bonzo.finance/)
+- [Bonzo developer contracts](https://docs.bonzo.finance/hub/developer/bonzo-lend/lend-contracts)
+- [Scaffold HBAR docs](https://docs.hedera.com/solutions/tools/scaffold-hbar)
+- [Hedera Portal faucet](https://portal.hedera.com/faucet)
+- [HashScan](https://hashscan.io/)

@@ -1,0 +1,46 @@
+{
+  "name": "bonzo-lend",
+  "description": "Bonzo Finance lending on Hedera: supply, borrow, repay, withdraw with HTS association checks, HCS audit trail, and AuditAnchor.",
+  "create-scaffold-hbar": {
+    "capabilities": {
+      "frontend": ["nextjs-app"],
+      "solidityFramework": ["hardhat"],
+      "packageManager": ["yarn", "npm"]
+    },
+    "defaults": {
+      "frontend": "nextjs-app",
+      "solidityFramework": "hardhat",
+      "packageManager": "yarn"
+    },
+    "outro": {
+      "sections": [
+        {
+          "title": "Next steps",
+          "steps": [
+            {
+              "label": "Generate or import a deployer account",
+              "command": "{run:framework:account:generate}"
+            },
+            {
+              "label": "Fund the account from the Hedera Portal faucet, then get Bonzo testnet HTS assets (Discord #testnet-faucet or SaucerSwap testnet)"
+            },
+            {
+              "label": "Deploy AuditAnchor to Hedera testnet",
+              "command": "yarn hardhat:deploy --network hederaTestnet"
+            },
+            {
+              "label": "Optional: create an HCS audit topic (set HEDERA_OPERATOR_ID/KEY), then save HCS_AUDIT_TOPIC_ID"
+            },
+            {
+              "label": "Start the frontend",
+              "command": "{run:next:dev}"
+            },
+            {
+              "text": "Open /markets, associate HTS tokens in HashPack if needed, then supply via /supply."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
