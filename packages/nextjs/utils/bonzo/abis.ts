@@ -5,7 +5,7 @@ export const lendingPoolAbi = [
   {
     type: "function",
     name: "deposit",
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     inputs: [
       { name: "asset", type: "address" },
       { name: "amount", type: "uint256" },
@@ -41,7 +41,7 @@ export const lendingPoolAbi = [
   {
     type: "function",
     name: "repay",
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     inputs: [
       { name: "asset", type: "address" },
       { name: "amount", type: "uint256" },
